@@ -1,10 +1,15 @@
 package com.example.fetchtest;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Call;
@@ -14,12 +19,18 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
-    private TextView textView;
+    private RecyclerView recyclerView;
+    private MyAdapter myAdapter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        textView = findViewById(R.id.textView);
+        recyclerView = findViewById(R.id.recyclerview);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.addItemDecoration(new DividerItemDecoration(this,DividerItemDecoration.HORIZONTAL));
+        myAdapter = new MyAdapter();
+        recyclerView.setAdapter(myAdapter);
+
         Retrofit retrofit = new Retrofit.Builder().baseUrl("https://fetch-hiring.s3.amazonaws.com")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
@@ -29,22 +40,27 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<List<Items>> call, Response<List<Items>> response) {
                 if(!response.isSuccessful()){
-                    textView.setText("Code: "+response.code());
+                    System.out.println("Code: "+response.code());
                     return;
                 }
                 List<Items> items = response.body();
-                for(Items item: items){
-                    String content = "";
-                    content += "id: " + item.getId() + "\n";
-                    content += "listId: " + item.getId() + "\n";
-                    content += "name: " + item.getId() + "\n";
-                    textView.append(content);
+//                items.removeIf(x -> x.getName().isEmpty());
+                List<Items> filteredItems = new ArrayList<>();
+                if (items!=null && items.size()>0) {
+                    for(Items item: items){
+                        if(item.getName()!=null && !item.getName().isEmpty()){
+                            filteredItems.add(item);
+                        }
+                    }
                 }
+                myAdapter.setListData(filteredItems);
+                System.out.println(items);
             }
 
             @Override
             public void onFailure(Call<List<Items>> call, Throwable t) {
-                textView.setText("Message: "+ t.getMessage());
+                Toast.makeText(getApplicationContext(),t.getMessage(),Toast.LENGTH_SHORT).show();
+                System.out.println("Message: "+ t.getMessage());
             }
         });
     }
