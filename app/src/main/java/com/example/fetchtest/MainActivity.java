@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
 
+import android.util.Log;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -25,6 +26,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class MainActivity extends AppCompatActivity {
     RecyclerView recyclerView;
     private MyAdapter myAdapter;
+    private static final String TAG = "MainActivity";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -32,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.recyclerview);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.addItemDecoration(new DividerItemDecoration(this,DividerItemDecoration.HORIZONTAL));
-        myAdapter = new MyAdapter();
+        myAdapter = new MyAdapter(getApplicationContext());
         recyclerView.setAdapter(myAdapter);
 
         Retrofit retrofit = new Retrofit.Builder().baseUrl("https://fetch-hiring.s3.amazonaws.com")
@@ -91,8 +93,9 @@ public class MainActivity extends AppCompatActivity {
                         }
                     });
                 }
-                myAdapter.setListData(filteredItems);
-                System.out.println(items);
+                Log.d(TAG, "onResponse: "+ groupedData.keySet());
+                myAdapter.setData(groupedData);
+//                System.out.println(items);
             }
 
             @Override
