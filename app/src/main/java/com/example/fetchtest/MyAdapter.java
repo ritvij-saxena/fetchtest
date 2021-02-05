@@ -1,94 +1,94 @@
 package com.example.fetchtest;
 
 import android.content.Context;
-import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
+import android.widget.BaseExpandableListAdapter;
 import android.widget.TextView;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
-import androidx.cardview.widget.CardView;
-import androidx.recyclerview.widget.RecyclerView;
-
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyAdapterViewHolder> {
-//    List<Items> items;
-    Context context;
-    Map<Integer,List<Items>> items;
-    List<Boolean> expandState = new ArrayList<>();
+class MyAdapter extends BaseExpandableListAdapter{
+    Map<Integer, List<Items>> items;
+    private Context context;
+    private Object[] keys;
+
     public MyAdapter(Context context){
         this.context = context;
     }
-
-    private static final String TAG = "MyAdapter";
-
-    void setData(Map<Integer,List<Items>> items) {
+    void setData(Map<Integer,List<Items>>items, Object[] keys){
         this.items = items;
-        setCardExpandStates(items.keySet().toArray());
+        this.keys = keys;
         notifyDataSetChanged();
     }
+    @Override
+    public int getGroupCount() {
+        //headers
+        return keys == null ? 0 : keys.length;
+    }
 
-    void setCardExpandStates(Object[] arr){
-        for(int i=0;i<arr.length;i++){
-            expandState.add(false);
+    @Override
+    public int getChildrenCount(int i) {
+        return items.get(keys[i]).size();
+    }
+
+    @Override
+    public Object getGroup(int i) {
+        return keys[i];
+    }
+
+    @Override
+    public Object getChild(int i, int i1) {
+        return items.get(keys[i]).get(i1);
+    }
+
+    @Override
+    public long getGroupId(int i) {
+        return i;
+    }
+
+    @Override
+    public long getChildId(int i, int i1) {
+        return i1;
+    }
+
+    @Override
+    public boolean hasStableIds() {
+        return false;
+    }
+
+    @Override
+    public View getGroupView(int i, boolean b, View view, ViewGroup viewGroup) {
+        String title = getGroup(i).toString();
+        if(view == null){
+            LayoutInflater inflater = (LayoutInflater)this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            view = inflater.inflate(R.layout.item_group_layout,null);
         }
-    }
-
-    @NonNull
-    @Override
-    public MyAdapter.MyAdapterViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new MyAdapter.MyAdapterViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_layout, parent, false));
+        TextView groupTextView = view.findViewById(R.id.textViewListId);
+        groupTextView.setText(title);
+        return view;
     }
 
     @Override
-    public void onBindViewHolder(@NonNull final MyAdapter.MyAdapterViewHolder holder, final int position) {
-        final Object[] keys = items.keySet().toArray();
-        holder.listId.setText(keys[position].toString());
-
-        holder.expandButton.setOnClickListener(new View.OnClickListener() {
-            @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-            @Override
-            public void onClick(View view) {
-                myClick(position,holder,keys);
-            }
-        });
-        holder.cardView.setOnClickListener(new View.OnClickListener() {
-            @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-            @Override
-            public void onClick(View view) {
-                myClick(position,holder,keys);
-            }
-        });
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-    void myClick(int position, MyAdapterViewHolder holder, Object[] keys){
-        expandState.set(position,!expandState.get(position));
-        holder.expandButton.setRotation(expandState.get(position)? 180f: 0f);
-    }
-
-
-    @Override
-    public int getItemCount() {
-//        Log.d(TAG, "getItemCount: " + items);
-        return items == null ? 0 : items.size();
-    }
-
-    public static class MyAdapterViewHolder extends RecyclerView.ViewHolder {
-        TextView listId;
-        ImageButton expandButton;
-        CardView cardView;
-        public MyAdapterViewHolder(@NonNull View itemView) {
-            super(itemView);
-            listId = itemView.findViewById(R.id.textViewListId);
-            expandButton = itemView.findViewById(R.id.imageButtonExpand);
-            cardView = itemView.findViewById(R.id.cardView);
+    public View getChildView(int i, int i1, boolean b, View view, ViewGroup viewGroup) {
+        Items item = (Items) getChild(i,i1);
+        String name = item.getName();
+        String id = Integer.toString(item.getId());
+        if(view == null)
+        {
+            LayoutInflater inflater = (LayoutInflater)this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            view = inflater.inflate(R.layout.item_list_layout,null);
         }
+        TextView nameTextView = view.findViewById(R.id.textViewName);
+        TextView idTextView = view.findViewById(R.id.textViewId);
+        nameTextView.setText(name);
+        idTextView.setText(id);
+        return view;
+    }
+
+    @Override
+    public boolean isChildSelectable(int i, int i1) {
+        return false;
     }
 }

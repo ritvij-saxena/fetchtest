@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.os.Bundle;
 
 import android.util.Log;
+import android.widget.ExpandableListView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -24,18 +25,18 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
-    RecyclerView recyclerView;
-    private MyAdapter myAdapter;
     private static final String TAG = "MainActivity";
+    private MyAdapter myAdapter;
+    private ExpandableListView expandableListView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        recyclerView = findViewById(R.id.recyclerview);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.addItemDecoration(new DividerItemDecoration(this,DividerItemDecoration.HORIZONTAL));
+
+        expandableListView = findViewById(R.id.expandListView);
         myAdapter = new MyAdapter(getApplicationContext());
-        recyclerView.setAdapter(myAdapter);
+        expandableListView.setAdapter(myAdapter);
 
         Retrofit retrofit = new Retrofit.Builder().baseUrl("https://fetch-hiring.s3.amazonaws.com")
                 .addConverterFactory(GsonConverterFactory.create())
@@ -89,12 +90,13 @@ public class MainActivity extends AppCompatActivity {
                     Collections.sort(item.getValue(), new Comparator<Items>() {
                         @Override
                         public int compare(Items t1, Items t2) {
-                            return t1.getName().compareTo(t2.getName());
+//                            return  t1.getId() - t2.getId();
+                            return Integer.parseInt(t1.getName().split(" ")[1].trim()) - Integer.parseInt(t2.getName().split(" ")[1].trim());
                         }
                     });
                 }
                 Log.d(TAG, "onResponse: "+ groupedData.keySet());
-                myAdapter.setData(groupedData);
+                myAdapter.setData(groupedData,groupedData.keySet().toArray());
 //                System.out.println(items);
             }
 
