@@ -1,9 +1,11 @@
 package com.example.fetchtest;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
 
 import android.util.Log;
+import android.view.View;
 import android.widget.ExpandableListView;
 import android.widget.Toast;
 
@@ -42,17 +44,17 @@ public class MainActivity extends AppCompatActivity {
         call.enqueue(new Callback<List<Items>>() {
             @Override
             public void onResponse(Call<List<Items>> call, Response<List<Items>> response) {
-                if(!response.isSuccessful()){
-                    System.out.println("Code: "+response.code());
+                if (!response.isSuccessful()) {
+                    System.out.println("Code: " + response.code());
                     return;
                 }
                 List<Items> items = response.body();
 //                items.removeIf(x -> x.getName().isEmpty());
                 List<Items> filteredItems = new ArrayList<>();
                 //filtering out null or "" values
-                if (items!=null && items.size()>0) {
-                    for(Items item: items){
-                        if(item.getName()!=null && !item.getName().isEmpty()){
+                if (items != null && items.size() > 0) {
+                    for (Items item : items) {
+                        if (item.getName() != null && !item.getName().isEmpty()) {
                             filteredItems.add(item);
                         }
                     }
@@ -71,18 +73,18 @@ public class MainActivity extends AppCompatActivity {
                  *
                  * */
                 // TreeMap used for storing sorted keys;
-                Map<Integer,List<Items>> groupedData = new TreeMap<>();
-                for(Items item: filteredItems){
-                    if(groupedData.containsKey(item.getListId())){
+                Map<Integer, List<Items>> groupedData = new TreeMap<>();
+                for (Items item : filteredItems) {
+                    if (groupedData.containsKey(item.getListId())) {
                         groupedData.get(item.getListId()).add(item);
-                    }else{
+                    } else {
                         List<Items> newList = new ArrayList<>();
                         newList.add(item);
-                        groupedData.put(item.getListId(),newList);
+                        groupedData.put(item.getListId(), newList);
                     }
                 }
                 // sorting grouped items with respect to name;
-                for(Map.Entry<Integer,List<Items>> item : groupedData.entrySet()){
+                for (Map.Entry<Integer, List<Items>> item : groupedData.entrySet()) {
                     Collections.sort(item.getValue(), new Comparator<Items>() {
                         @Override
                         public int compare(Items t1, Items t2) {
@@ -91,15 +93,39 @@ public class MainActivity extends AppCompatActivity {
                         }
                     });
                 }
-                Log.d(TAG, "onResponse: "+ groupedData.keySet());
-                myAdapter.setData(groupedData,groupedData.keySet().toArray());
+                Log.d(TAG, "onResponse: " + groupedData.keySet());
+                myAdapter.setData(groupedData, groupedData.keySet().toArray());
 //                System.out.println(items);
             }
 
             @Override
             public void onFailure(Call<List<Items>> call, Throwable t) {
-                Toast.makeText(getApplicationContext(),t.getMessage(),Toast.LENGTH_SHORT).show();
-                System.out.println("Message: "+ t.getMessage());
+                Toast.makeText(getApplicationContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
+                System.out.println("Message: " + t.getMessage());
+            }
+        });
+
+        expandableListView.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
+            @Override
+            public boolean onGroupClick(ExpandableListView expandableListView, View view, int i, long l) {
+                expandableListView.smoothScrollToPosition(i);
+                if (expandableListView.isGroupExpanded(i)) {
+                    expandableListView.collapseGroup(i);
+                } else {
+                    expandableListView.expandGroup(i);
+                }
+                return true;
+            }
+        });
+        expandableListView.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
+            int previousGroup = -1;
+
+            @Override
+            public void onGroupExpand(int i) {
+                if (previousGroup != i) {
+                    expandableListView.collapseGroup(previousGroup);
+                }
+                previousGroup = i;
             }
         });
     }
