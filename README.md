@@ -23,7 +23,7 @@ dependencies{
 }
 ```
 
-Retrofit: https://square.github.io/retrofit
+Retrofit: https://square.github.io/retrofit <br>
 CardView: https://developer.android.com/guide/topics/ui/layout/cardview
 
 Steps taken within the app to accomplish the TODOs mentioned above:
