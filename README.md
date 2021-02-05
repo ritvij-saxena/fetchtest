@@ -45,3 +45,8 @@ Steps taken within the app to accomplish the TODOs mentioned above:
                     });
                 }
   ```
+  
+  
+  ## Screenshots: <br>
+  <img src="https://raw.githubusercontent.com/ritvij-saxena/fetchtest/master/screenshots/Screenshot_1612550502.png" width="250" height="500"/>
+  <img src="https://raw.githubusercontent.com/ritvij-saxena/fetchtest/master/screenshots/Screenshot_1612550505.png" width="250" height="500"/>
